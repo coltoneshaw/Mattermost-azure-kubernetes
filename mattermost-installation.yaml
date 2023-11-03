@@ -1,0 +1,56 @@
+apiVersion: installation.mattermost.com/v1beta1
+kind: Mattermost
+metadata:
+    # Name of the Mattermost cluster as shown in Kubernetes.
+    name: mattermost
+spec:
+    # https://github.com/mattermost/mattermost-operator/blob/master/apis/mattermost/v1alpha1/clusterinstallation_sizes.go
+    size: 1000users 
+    database:
+        external:
+            # this is the "metadata.name" in your mattermost-secret-postgres.yaml file
+            secret: mattermost-secret-postgres
+    elasticSearch: {}
+    # Name of a Kubernetes secret that contains Mattermost license. Required only for enterprise installation.
+     # this is the "metadata.name" in your mattermost-secret-license.yaml file
+    licenseSecret: "mattermost-secret-license"
+    fileStore:
+        external:
+            # Structure of this url is service.namespace.svc.cluster.local
+            # "minio" is the standard service name for the minio tenant and should be correct unless you've deviated from the guide. 
+            url: minio.mattermost.svc.cluster.local
+            # The bucket created in the minio tenant above.
+            bucket: mattermost
+            # this is the "metadata.name" in your mattermost-secret-minio.yaml file
+            secret: mattermost-secret-minio
+    image: mattermost/mattermost-enterprise-edition
+    imagePullPolicy: IfNotPresent
+    mattermostEnv:
+        # These must be set to false when using minio.
+        - name: MM_FILESETTINGS_AMAZONS3SSE
+        value: "false"
+        - name: MM_FILESETTINGS_AMAZONS3SSL
+        value: "false"
+    ingress:
+        annotations:
+            kubernetes.io/tls-acme: "true"
+            nginx.ingress.kubernetes.io/proxy-body-size: 100m
+            nginx.ingress.kubernetes.io/proxy-buffering: "on"
+            nginx.ingress.kubernetes.io/proxy-max-temp-file-size: "0"
+            nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+            nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            nginx.org/server-snippets: gzip on;
+            kubernetes.io/ingress.class: nginx
+        enabled: true
+        # This is the domain name that you will point towards the ingress-nginx external ip.
+        host: mattermost.example.com
+    ingressName: ""
+    podExtensions: {}
+    probes:
+        livenessProbe: {}
+        readinessProbe: {}
+    # Number of Mattermost replicas. Using this will override the `size`.
+    # replicas: 3
+    # version of Mattermost
+    version: 9.1.0
