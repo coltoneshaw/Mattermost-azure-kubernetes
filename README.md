@@ -416,6 +416,7 @@ For detailed questions, reference the guide.
     ```
 
     Note: Copy / store the credentials that it outputs. If you ever lose these, they can be found again in the minio operator console.
+    Note 2: You need to use a `nfs-premium` storage class or you will run into issues with multi-volume instances.
 
     **Example**:
 
@@ -442,7 +443,7 @@ For detailed questions, reference the guide.
     > 
     ```
 
-2. Forward local port `9000` into the minio service on port `80`
+3. Forward local port `9000` into the minio service on port `80`
 
     ```bash
     kubectl -n MATTERMOST_NAMESPACE port-forward svc/minio 9000:80
@@ -456,7 +457,7 @@ For detailed questions, reference the guide.
     Forwarding from [::1]:9000 -> 9000
     ```
 
-3. Create the `mc` connection to your minio pod, create the bucket, and add a service account.
+4. Create the `mc` connection to your minio pod, create the bucket, and add a service account.
 
     - `TENANT_NAME` - Same tenant name as above.
     - `MINIO_TENANT_USERNAME` - The username that was output at step 1 when creating the tenant
